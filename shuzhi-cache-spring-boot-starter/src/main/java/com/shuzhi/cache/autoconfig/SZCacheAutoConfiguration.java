@@ -1,15 +1,15 @@
 package com.shuzhi.cache.autoconfig;
 
 import com.shuzhi.cache.SZCacheConstant;
-import com.shuzhi.cache.core.interceptor.SZCacheInterceptor;
+import com.shuzhi.cache.core.interceptor.SZCacheAspectInterceptor;
 import com.shuzhi.cache.core.service.ICacheService;
-import com.shuzhi.cache.core.service.RedisService;
-import com.shuzhi.cache.core.service.impl.RedisCacheServiceImpl;
 import com.shuzhi.cache.core.support.SZCacheSupport;
+import com.shuzhi.cache.properties.SZRedisCacheProperties;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.support.SimpleCacheManager;
@@ -25,44 +25,42 @@ import java.util.Collections;
  **/
 @Configuration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableConfigurationProperties(SZRedisCacheProperties.class)
 public class SZCacheAutoConfiguration {
 
-    @Bean
-    @ConditionalOnProperty(prefix = "shuzhi.cache", name = "cacheType", havingValue = "redis")
-    public ICacheService getRedisCacheService() {
-        return new RedisCacheServiceImpl();
+    private final SZRedisCacheProperties szRedisCacheProperties;
+
+    public SZCacheAutoConfiguration(SZRedisCacheProperties szRedisCacheProperties) {
+        this.szRedisCacheProperties = szRedisCacheProperties;
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "shuzhi.cache", name = "cacheType", havingValue = "redis")
-    public RedisService getRedisService() {
-        return new RedisService();
-    }
-
-    @Bean
+    @ConditionalOnBean(ICacheService.class)
     public CacheManager cacheManager(ICacheService cacheService) {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
         SZCacheSupport cacheSupport = new SZCacheSupport();
         cacheSupport.setExpireTime(SZCacheConstant.CACHE_DEFAULT_EXPIRE_TIME);
-        cacheSupport.setName(SZCacheConstant.CACHE_DEFAULT_NAME);
+        cacheSupport.setName(SZCacheConstant.CACHE_DEFAULT_PREFIX);
         cacheSupport.setCacheService(cacheService);
+        cacheSupport.setEnableCache(szRedisCacheProperties.getEnabled());
         cacheManager.setCaches(Collections.singletonList(cacheSupport));
         return cacheManager;
     }
 
     @Bean
-    public SZCacheInterceptor cacheInterceptor(CacheManager cacheManager) {
-        SZCacheInterceptor interceptor = new SZCacheInterceptor();
+    @ConditionalOnBean(CacheManager.class)
+    public SZCacheAspectInterceptor cacheInterceptor(CacheManager cacheManager) {
+        SZCacheAspectInterceptor interceptor = new SZCacheAspectInterceptor();
         interceptor.setCacheManager(cacheManager);
         interceptor.setCacheOperationSources(new AnnotationCacheOperationSource());
         return interceptor;
     }
 
     @Bean
-    public Advisor cacheAdvisor(SZCacheInterceptor cacheInterceptor) {
+    @ConditionalOnBean(SZCacheAspectInterceptor.class)
+    public Advisor cacheAdvisor(SZCacheAspectInterceptor cacheInterceptor) {
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         String expression = getCacheExpression();
-        System.out.println("expression is " + expression);
         pointcut.setExpression(expression);
         return new DefaultPointcutAdvisor(pointcut, cacheInterceptor);
     }

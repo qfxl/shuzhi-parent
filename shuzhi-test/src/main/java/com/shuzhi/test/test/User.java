@@ -1,4 +1,4 @@
-package com.shuzhi.cache.test;
+package com.shuzhi.test.test;
 
 import lombok.Data;
 

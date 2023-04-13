@@ -1,4 +1,4 @@
-package com.shuzhi.cache.core;
+package com.shuzhi.cache.core.support;
 
 import com.shuzhi.cache.core.pojo.SZCacheConfigBean;
 import org.springframework.cache.Cache;
@@ -8,7 +8,7 @@ import org.springframework.cache.Cache;
  * @author wangxingzhe
  * @date 2015/4/4
  */
-public interface SZCache extends Cache {
+public interface CacheSupport extends Cache {
     /**
      * get valueMapper
      * @param cacheConfig

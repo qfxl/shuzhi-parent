@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.shuzhi.cache.autoconfig.SZCacheAutoConfiguration
+  com.shuzhi.cache.autoconfig.SZCacheAutoConfiguration ,\
+  com.shuzhi.cache.autoconfig.SZRedisAutoConfiguration

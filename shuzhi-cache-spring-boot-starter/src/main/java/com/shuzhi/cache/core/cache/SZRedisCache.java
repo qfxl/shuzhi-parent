@@ -1,11 +1,12 @@
-package com.shuzhi.cache.core.service;
+package com.shuzhi.cache.core.cache;
 
-import com.shuzhi.cache.settings.SZCacheSettings;
+import com.shuzhi.cache.properties.SZRedisCacheProperties;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -18,11 +19,11 @@ import java.util.*;
  *
  * @author zhangyabo
  */
-public class RedisService {
-    protected static Logger logger = LoggerFactory.getLogger(RedisService.class);
+public class SZRedisCache {
+    protected static Logger logger = LoggerFactory.getLogger(SZRedisCache.class);
 
     @Resource
-    private SZCacheSettings cacheSettings;
+    private SZRedisCacheProperties cacheProperties;
 
     private ShardedJedisPool pool;
 
@@ -31,16 +32,17 @@ public class RedisService {
      */
     @PostConstruct
     public void init() {
+        Assert.notNull(cacheProperties, "未获取到redis缓存配置，请检查配置文件！");
         GenericObjectPoolConfig<ShardedJedis> config = new GenericObjectPoolConfig<>();
         config.setTestOnBorrow(true);
-        config.setMaxIdle(cacheSettings.getMaxIdle());
-        config.setMinIdle(cacheSettings.getMinIdle());
-        config.setMaxTotal(cacheSettings.getMaxTotal());
-        config.setMaxWaitMillis(cacheSettings.getMaxWaitMillis());
+        config.setMaxIdle(cacheProperties.getPool().getMaxIdle());
+        config.setMinIdle(cacheProperties.getPool().getMinIdle());
+        config.setMaxTotal(cacheProperties.getPool().getMaxTotal());
+        config.setMaxWaitMillis(cacheProperties.getPool().getMaxWaitMillis());
 
         List<JedisShardInfo> list = new ArrayList<>();
-        String hosts = cacheSettings.getHosts();
-        String pass = cacheSettings.getPassword();
+        String hosts = cacheProperties.getHosts();
+        String pass = cacheProperties.getPass();
         if (hosts != null && CollectionUtils.isEmpty(list)) {
             String[] hs = hosts.split(",");
             for (String h : hs) {
@@ -65,7 +67,7 @@ public class RedisService {
     }
 
     public void setKeyPrefix(String keyPrefix) {
-        cacheSettings.setKeyPrefix(keyPrefix);
+        cacheProperties.setKeyPrefix(keyPrefix);
     }
 
     public ShardedJedisPool getShardedJedisPool() {
@@ -256,7 +258,7 @@ public class RedisService {
 
 
     public String getKeyPrefix() {
-        return cacheSettings.getKeyPrefix();
+        return cacheProperties.getKeyPrefix();
     }
 
 

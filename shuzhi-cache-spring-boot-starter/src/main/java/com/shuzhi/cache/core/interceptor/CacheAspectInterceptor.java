@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.shuzhi.cache.core.support;
+package com.shuzhi.cache.core.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
-import com.shuzhi.cache.core.SZCache;
+import com.shuzhi.cache.SZCacheTypeEnum;
 import com.shuzhi.cache.annotation.SZCacheConfig;
 import com.shuzhi.cache.core.common.DefaultKeyGenerator;
 import com.shuzhi.cache.core.common.ExpressionEvaluator;
 import com.shuzhi.cache.core.pojo.SZCacheConfigBean;
-import com.shuzhi.cache.SZCacheTypeEnum;
+import com.shuzhi.cache.core.support.CacheSupport;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +60,7 @@ import java.util.*;
  * @author Chris Beams
  * @since 3.1
  */
-public abstract class CacheAspectSupport implements InitializingBean {
+public abstract class CacheAspectInterceptor implements InitializingBean {
 
     public interface Invoker {
         /**
@@ -276,9 +276,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
                         for (Cache cache : context.getCaches()) {
                             // cache-wide flush
                             if (evictOp.isCacheWide()) {
-                                if (cache instanceof SZCache) {
-                                    SZCache SZCache = (SZCache) cache;
-                                    SZCache.clear(context.getCacheConfig());
+                                if (cache instanceof CacheSupport) {
+                                    CacheSupport CacheSupport = (CacheSupport) cache;
+                                    CacheSupport.clear(context.getCacheConfig());
                                 } else {
                                     cache.clear();
                                 }
@@ -293,9 +293,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
                                 if (log) {
                                     logger.trace("Invalidating cache key " + key + " for operation " + evictOp + " on method " + context.method);
                                 }
-                                if (SZCache.class.isInstance(cache)) {
-                                    SZCache SZCache = (SZCache) cache;
-                                    SZCache.evict(context.getCacheConfig(), key);
+                                if (CacheSupport.class.isInstance(cache)) {
+                                    CacheSupport CacheSupport = (CacheSupport) cache;
+                                    CacheSupport.evict(context.getCacheConfig(), key);
                                 } else {
                                     cache.evict(key);
                                 }
@@ -344,9 +344,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
                     if (!updateRequire) {
                         for (Cache cache : context.getCaches()) {
                             Cache.ValueWrapper wrapper;
-                            if (cache instanceof SZCache) {
-                                SZCache szCache = (SZCache) cache;
-                                wrapper = szCache.get(context.getCacheConfig(), key);
+                            if (cache instanceof CacheSupport) {
+                                CacheSupport cacheSupport = (CacheSupport) cache;
+                                wrapper = cacheSupport.get(context.getCacheConfig(), key);
                             } else {
                                 wrapper = cache.get(key);
                             }
@@ -428,9 +428,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
     private void update(Map<CacheOperationContext, Object> updates, Object retVal) {
         for (Map.Entry<CacheOperationContext, Object> entry : updates.entrySet()) {
             for (Cache cache : entry.getKey().getCaches()) {
-                if (cache instanceof SZCache) {
-                    SZCache SZCache = (SZCache) cache;
-                    SZCache.put(entry.getKey().getCacheConfig(), entry.getValue(), retVal);
+                if (cache instanceof CacheSupport) {
+                    CacheSupport CacheSupport = (CacheSupport) cache;
+                    CacheSupport.put(entry.getKey().getCacheConfig(), entry.getValue(), retVal);
                 } else {
                     cache.put(entry.getValue(), retVal);
                 }
@@ -489,7 +489,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
         public CacheOperationContext(CacheOperation operation, Method method, Object[] args, Object target, Class<?> targetClass) {
             this.operation = operation;
-            this.caches = CacheAspectSupport.this.getCaches(operation);
+            this.caches = CacheAspectInterceptor.this.getCaches(operation);
             this.target = target;
             this.method = method;
             this.args = args;

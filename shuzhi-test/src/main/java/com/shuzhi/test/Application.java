@@ -1,17 +1,13 @@
-package com.shuzhi.cache;
+package com.shuzhi.test;
 
-import com.shuzhi.cache.test.TestService;
-import com.shuzhi.cache.test.User;
+import com.shuzhi.test.test.TestService;
+import com.shuzhi.test.test.User;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.concurrent.CompletableFuture;
 
-/**
- * @author xuyonghong
- * @date 2023-04-10 14:58
- **/
 @SpringBootApplication
 public class Application {
 
@@ -35,4 +31,5 @@ public class Application {
 
         Thread.sleep(5000);
     }
+
 }

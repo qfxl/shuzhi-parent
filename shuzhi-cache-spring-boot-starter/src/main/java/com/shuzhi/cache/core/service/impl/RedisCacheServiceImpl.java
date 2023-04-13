@@ -1,8 +1,8 @@
 package com.shuzhi.cache.core.service.impl;
 
+import com.shuzhi.cache.core.cache.SZRedisCache;
 import com.shuzhi.cache.core.pojo.CacheTuple;
 import com.shuzhi.cache.core.service.ICacheService;
-import com.shuzhi.cache.core.service.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Tuple;
@@ -22,17 +22,17 @@ public class RedisCacheServiceImpl implements ICacheService {
     protected static Logger logger = LoggerFactory.getLogger(RedisCacheServiceImpl.class);
 
     @Resource
-    private RedisService redisService;
+    private SZRedisCache redisCache;
 
     @Override
     public Boolean expire(String key, long second) {
-        return redisService.expire(key, (int) second);
+        return redisCache.expire(key, (int) second);
     }
 
     @Override
     public void set(String key, String value) {
         try {
-            redisService.save(key, value);
+            redisCache.save(key, value);
         } catch (Exception e) {
             logger.error("", e);
         }
@@ -42,7 +42,7 @@ public class RedisCacheServiceImpl implements ICacheService {
     public String get(String key) {
         String re = null;
         try {
-            re = redisService.get(key);
+            re = redisCache.get(key);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -51,19 +51,19 @@ public class RedisCacheServiceImpl implements ICacheService {
 
     @Override
     public Long incr(String key) {
-        return redisService.incr(key);
+        return redisCache.incr(key);
     }
 
     @Override
     public Long incrBy(String key, Long num) {
-        return redisService.incrBy(key, num);
+        return redisCache.incrBy(key, num);
     }
 
     @Override
     public Long delete(String key) {
         long re = 0;
         try {
-            re = redisService.remove(key);
+            re = redisCache.remove(key);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,38 +72,38 @@ public class RedisCacheServiceImpl implements ICacheService {
 
     @Override
     public boolean setnx(String key, String value) {
-        long ret = redisService.setnx(key, value);
+        long ret = redisCache.setnx(key, value);
         return ret > 0;
     }
 
     @Override
     public Double zscore(String key, String member) {
 
-        return redisService.zscore(key, member);
+        return redisCache.zscore(key, member);
     }
 
     @Override
     public Long zrevrank(String key, String member) {
 
-        return redisService.zrevrank(key, member);
+        return redisCache.zrevrank(key, member);
     }
 
     @Override
     public boolean zadd(String key, double score, String member) {
-        long ret = redisService.zadd(key, Double.valueOf(score).intValue(), member);
+        long ret = redisCache.zadd(key, Double.valueOf(score).intValue(), member);
         return ret > 0;
     }
 
     @Override
     public Double zincrby(String key, double score, String member) {
 
-        return redisService.zincrby(key, Double.valueOf(score).intValue(), member);
+        return redisCache.zincrby(key, Double.valueOf(score).intValue(), member);
     }
 
     @Override
     public LinkedHashSet<CacheTuple> zrevrangeWithScores(String key, long start, long end) {
         LinkedHashSet<CacheTuple> re = null;
-        Set<Tuple> ret = redisService.zrevrangeWithScores(key, start, end);
+        Set<Tuple> ret = redisCache.zrevrangeWithScores(key, start, end);
         logger.info("{}", ret);
         if (ret != null) {
             re = new LinkedHashSet<CacheTuple>();
@@ -118,78 +118,78 @@ public class RedisCacheServiceImpl implements ICacheService {
     @Override
     public String hget(String rk, String field) {
 
-        return redisService.hget(rk, field);
+        return redisCache.hget(rk, field);
     }
 
     @Override
     public boolean hset(String key, String field, String value) {
 
-        return redisService.hset(key, field, value);
+        return redisCache.hset(key, field, value);
     }
 
     @Override
     public long hdel(String key, String... fields) {
-        return redisService.hdel(key, fields);
+        return redisCache.hdel(key, fields);
     }
 
     @Override
     public long hIncrBy(String key, String field, int increment) {
-        return redisService.hIncrBy(key, field, increment);
+        return redisCache.hIncrBy(key, field, increment);
     }
 
     @Override
     public Set<String> keys(String key) {
-        return redisService.keys(key);
+        return redisCache.keys(key);
     }
 
     @Override
     public List<String> scan(String key) {
-        return redisService.scan(key);
+        return redisCache.scan(key);
     }
 
     @Override
     public Long ttl(String key) {
-        return redisService.ttl(key);
+        return redisCache.ttl(key);
     }
 
     @Override
     public Map<String, String> hGetAll(String key) {
-        return redisService.hGetAll(key);
+        return redisCache.hGetAll(key);
     }
 
     @Override
     public List<String> hmget(String rk, String... fields) {
 
-        return redisService.hmget(rk, fields);
+        return redisCache.hmget(rk, fields);
     }
 
     @Override
     public Boolean exists(String key) {
 
-        return redisService.exists(key);
+        return redisCache.exists(key);
     }
 
     @Override
     public void setKeyPrefix(String keyPrefix) {
-        this.redisService.setKeyPrefix(keyPrefix);
+        this.redisCache.setKeyPrefix(keyPrefix);
     }
 
     @Override
     public void hMSet(String key, Map<String, String> values) {
         if (key != null && values != null && !values.isEmpty()) {
-            redisService.hmset(key, values);
+            redisCache.hmset(key, values);
         }
     }
 
     @Override
     public long zcard(String key) {
 
-        return redisService.zcard(key);
+        return redisCache.zcard(key);
     }
 
     @Override
     public Map<String, Long> clearCache(List<String> keys) {
-        return redisService.clearCache(keys);
+        return redisCache.clearCache(keys);
     }
 
 }

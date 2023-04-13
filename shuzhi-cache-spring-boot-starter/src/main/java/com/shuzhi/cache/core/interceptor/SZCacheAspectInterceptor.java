@@ -16,7 +16,6 @@
 
 package com.shuzhi.cache.core.interceptor;
 
-import com.shuzhi.cache.core.support.CacheAspectSupport;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -28,7 +27,7 @@ import java.lang.reflect.Method;
  * management using the common Spring caching infrastructure
  * ({@link org.springframework.cache.Cache}).
  *
- * <p>Derives from the {@link CacheAspectSupport} class which
+ * <p>Derives from the {@link CacheAspectInterceptor} class which
  * contains the integration with Spring's underlying caching API.
  * CacheInterceptor simply calls the relevant superclass methods
  * in the correct order.
@@ -40,7 +39,7 @@ import java.lang.reflect.Method;
  * @since 3.1
  */
 @SuppressWarnings("serial")
-public class SZCacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
+public class SZCacheAspectInterceptor extends CacheAspectInterceptor implements MethodInterceptor, Serializable {
 
     private static class ThrowableWrapperException extends RuntimeException {
         private final Throwable original;

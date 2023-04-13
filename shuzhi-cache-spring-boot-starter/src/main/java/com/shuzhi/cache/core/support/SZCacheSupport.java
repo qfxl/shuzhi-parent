@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.shuzhi.cache.SZCacheTypeEnum;
-import com.shuzhi.cache.core.SZCache;
 import com.shuzhi.cache.core.codec.LongCodec;
 import com.shuzhi.cache.core.common.StringSerializeUtil;
 import com.shuzhi.cache.core.pojo.SZCacheConfigBean;
@@ -14,7 +13,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
@@ -31,7 +29,7 @@ import java.util.concurrent.Callable;
  * @author wangxingzhe
  * @date 2015/3/31
  */
-public class SZCacheSupport implements SZCache {
+public class SZCacheSupport implements CacheSupport {
 
     protected static Logger logger = LoggerFactory.getLogger(SZCacheSupport.class);
 
@@ -39,8 +37,7 @@ public class SZCacheSupport implements SZCache {
 
     private int expireTime = 0;
 
-    @Value("${redis.enable}")
-    private Boolean enable;
+    private Boolean enableCache;
 
     private ICacheService cacheService;
 
@@ -91,7 +88,7 @@ public class SZCacheSupport implements SZCache {
      */
     @Override
     public ValueWrapper get(SZCacheConfigBean cacheConfig, Object key) {
-        if (Boolean.FALSE.equals(enable)) {
+        if (Boolean.FALSE.equals(getEnableCache())) {
             return null;
         }
         ValueWrapper valueWrapper = null;
@@ -219,9 +216,6 @@ public class SZCacheSupport implements SZCache {
                     data = StringSerializeUtil.serializeJSONToGzipHexString(data);
                 }
                 switch (cacheConfig.getType()) {
-                    case CACHE_TYPE_NORMAL:
-                        cacheService.set(k, data);
-                        break;
                     case CACHE_TYPE_INCR:
                         cacheService.incr(k);
                         break;
@@ -336,7 +330,7 @@ public class SZCacheSupport implements SZCache {
                 cacheService.delete(k);
             } else {
                 switch (cacheConfig.getType()) {
-                    case CACHE_TYPE_HASH_ONE://单次操作一个field
+                    case CACHE_TYPE_HASH_ONE:
                     case CACHE_TYPE_HASH_INCR:
                         if (cacheConfig.getFields() != null
                                 && cacheConfig.getFields().length > 0
@@ -401,5 +395,13 @@ public class SZCacheSupport implements SZCache {
 
     public void setCacheService(ICacheService cacheService) {
         this.cacheService = cacheService;
+    }
+
+    public Boolean getEnableCache() {
+        return enableCache;
+    }
+
+    public void setEnableCache(Boolean enableCache) {
+        this.enableCache = enableCache;
     }
 }
